@@ -13,6 +13,33 @@ Marketplace donde varias tiendas publican sus productos y los clientes arman un 
 - Alta de tiendas (`/register`) con aprobación manual desde `/admin/`.
 - Panel de la tienda: productos (con imagen), stock, descuentos y pedidos (confirmar / entregar / cancelar).
 
+## Vista rápida
+
+### Para compradores
+
+| Ofertas y búsqueda | Categorías |
+|---|---|
+| ![Ofertas](docs/screenshots/02-ofertas.png) | ![Categorías](docs/screenshots/03-categorias.png) |
+| Listado con filtros por precio y orden por descuento. | Productos agrupados por categoría. |
+
+| Detalle de producto | Carrito y checkout |
+|---|---|
+| ![Producto](docs/screenshots/04-producto.png) | ![Carrito](docs/screenshots/05-carrito.png) |
+| Precio con descuento, stock, contacto por WhatsApp y botón de carrito. | Carrito persistente; el pedido se divide en uno por tienda. |
+
+![Pedido enviado](docs/screenshots/06-pedido-enviado.png)
+
+### Para tiendas
+
+| Registro de tienda | Panel de la tienda |
+|---|---|
+| ![Registro](docs/screenshots/07-registro-tienda.png) | ![Panel](docs/screenshots/08-panel-tienda.png) |
+| Alta pública; un administrador la aprueba. | Productos propios: editar, borrar, vender, ver ofertas. |
+
+![Pedidos de la tienda](docs/screenshots/09-pedidos-tienda.png)
+
+> Capturas tomadas con los datos de ejemplo de `seed_demo`.
+
 ## Arranque local
 
 Requisitos: Python 3.11+ y Node 18+.

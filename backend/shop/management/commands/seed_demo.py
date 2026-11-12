@@ -1,4 +1,9 @@
+import io
+import colorsys
+
+from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
+from PIL import Image, ImageDraw
 
 from shop.models import Category, CustomUser, Product, State, SubCategory
 
@@ -14,6 +19,18 @@ SHOPS = [
     ('casabella', 'Casa Bella', '20222222223', 'Hogar'),
     ('urbanstyle', 'Urban Style', '20333333334', 'Moda'),
 ]
+
+
+def placeholder_image(text, seed):
+    """Imagen de ejemplo (fondo de color + iniciales) para que la demo no quede sin fotos."""
+    r, g, b = (int(c * 255) for c in colorsys.hsv_to_rgb((seed * 0.13) % 1, 0.35, 0.92))
+    img = Image.new('RGB', (480, 360), (r, g, b))
+    d = ImageDraw.Draw(img)
+    d.ellipse((150, 80, 330, 260), fill=(255, 255, 255))
+    d.text((240, 170), ''.join(w[0] for w in text.split()[:2]).upper(), fill=(r // 2, g // 2, b // 2), anchor='mm', font_size=70)
+    buf = io.BytesIO()
+    img.save(buf, 'JPEG', quality=85)
+    return ContentFile(buf.getvalue(), name='demo.jpg')
 
 
 class Command(BaseCommand):
@@ -49,11 +66,14 @@ class Command(BaseCommand):
                 shop.set_password('demo12345')
                 shop.save()
             for i, (name, desc, price, disc, sub) in enumerate(products[username]):
-                _, c = Product.objects.get_or_create(
+                prod, c = Product.objects.get_or_create(
                     barcode=f'DEMO-{username}-{i}',
                     defaults=dict(shop=shop, name=name, description=desc, price=price,
                                   discount=disc, subcategory=subs[sub], stock=20),
                 )
+                if not prod.image:
+                    prod.image = placeholder_image(name, n + i + idx)
+                    prod.save(update_fields=['image'])
                 n += c
         self.stdout.write(self.style.SUCCESS(
             f'Listo: {n} productos nuevos. Tiendas demo: techzone / casabella / urbanstyle (clave: demo12345)'))
