@@ -1,5 +1,10 @@
 # Plan de mejora del frontend + pagos
 
+> **Estado (rama `rediseno`):** F0–F6 implementadas (identidad Multi-Market, sistema de diseño, portada, listado con filtros,
+> ficha con galería, carrito lateral, checkout por pasos, seguimiento, páginas de tienda y panel). Pagos: Mercado Pago
+> (marketplace, probado con respuestas simuladas, **pendiente de sandbox real**), transferencia, efectivo/retiro y link de pago.
+> Pendiente: tests e2e automatizados y script `npm run screenshots` (F7), miniaturas de imágenes en el servidor, Ualá/MODO/PayPal por API.
+
 Objetivo: que Multi-Market se vea y se sienta como un marketplace real (lo mejor de **Mercado Libre**, **Amazon** y **Tienda Nube**), con identidad propia (sin "Ciudad Oferta"), datos de demo atractivos para capturas del README y pagos online con **Mercado Pago** y otros medios.
 
 ## 0. Qué tomamos de cada referencia

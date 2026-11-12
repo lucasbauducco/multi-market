@@ -1,136 +1,86 @@
 // router/index.js
 import { createRouter, createWebHistory } from 'vue-router';
-import Shop from '../views/Shop/HomeShop.vue';
-import Login from '../components/Shop/LoginView.vue';
-import Home from '../views/Client/Home.vue'
-import Offers from '../components/Shop/Offers.vue';
-import Categories from '../components/Client/Categories.vue';
-import Sell from '../components/Shop/Sell.vue';
-import ProductUpdate from '../components/Shop/ProductUpdate.vue';
-import ProductDetails from '../components/ProductDetails.vue';
 import store from '../store';
-import ListSearch from '../components/Client/ListSearch';
-import ListCategories from '../components/Client/ListCategories'
-import NotFound from '../components/Error/NotFound.vue';
-import ProductShop from '../components/Client/ListSearch.vue'
-import AboutUs from '../components/Client/AboutUs.vue'
-import TermsConditions from '../components/TermsConditions.vue'
-import Help from '../components/Help.vue'
-import Cart from '../components/Client/Cart.vue'
-import RegisterView from '../components/Shop/RegisterView.vue'
-import ShopOrders from '../components/Shop/ShopOrders.vue'
+
+const Home = () => import('../views/HomeView.vue');
+const Search = () => import('../views/SearchView.vue');
+const Product = () => import('../views/ProductView.vue');
+const Cart = () => import('../views/CartView.vue');
+const Checkout = () => import('../views/CheckoutView.vue');
+const Order = () => import('../views/OrderView.vue');
+const ShopPage = () => import('../views/ShopPageView.vue');
+const Shops = () => import('../views/ShopsView.vue');
+const Login = () => import('../views/LoginView.vue');
+const Register = () => import('../views/RegisterView.vue');
+const StaticPage = () => import('../views/StaticPages.vue');
+const NotFound = () => import('../views/NotFoundView.vue');
+const SellerLayout = () => import('../views/seller/SellerLayout.vue');
+const Dashboard = () => import('../views/seller/DashboardView.vue');
+const SellerProducts = () => import('../views/seller/ProductsView.vue');
+const ProductForm = () => import('../views/seller/ProductFormView.vue');
+const SellerOrders = () => import('../views/seller/OrdersView.vue');
+const Settings = () => import('../views/seller/SettingsView.vue');
 
 const routes = [
-{
-    path: '/',
-    name: 'Home',
-    component: Home,
+  { path: '/', name: 'Home', component: Home },
+  { path: '/buscar', name: 'Search', component: Search, meta: { keepKey: 'search' } },
+  { path: '/producto/:id', name: 'Product', component: Product },
+  { path: '/carrito', name: 'Cart', component: Cart },
+  { path: '/checkout', name: 'Checkout', component: Checkout },
+  { path: '/pedido/:token', name: 'Order', component: Order },
+  { path: '/tiendas', name: 'Shops', component: Shops },
+  { path: '/tienda/:slug', name: 'ShopPage', component: ShopPage },
+  { path: '/ingresar', name: 'Login', component: Login },
+  { path: '/registro', name: 'Register', component: Register },
+  { path: '/nosotros', component: StaticPage, props: { kind: 'about' } },
+  { path: '/ayuda', component: StaticPage, props: { kind: 'help' } },
+  { path: '/terminos', component: StaticPage, props: { kind: 'terms' } },
+
+  {
+    path: '/panel',
+    component: SellerLayout,
+    meta: { requiresAuth: true },
     children: [
-      {
-        path: '/', // Esto se convertirá en /shop/products
-        components: {
-          offers: Offers,
-        },
-      },
+      { path: '', name: 'Dashboard', component: Dashboard },
+      { path: 'productos', component: SellerProducts },
+      { path: 'productos/nuevo', component: ProductForm },
+      { path: 'productos/:id', component: ProductForm },
+      { path: 'pedidos', component: SellerOrders },
+      { path: 'configuracion', component: Settings },
     ],
   },
-  {
-    path: '/product/:productId',
-    name: 'ProductDetails',
-    component: ProductDetails,
-    props: true,
-  },
-  {
-    path: '/search',
-    name: 'ListSearch',
-    component: ListSearch,
-    props: false
-  },
-  {
-    path: '/about-us',
-    name: 'AboutUs',
-    component: AboutUs,
-  },
-  {
-    path: '/terms-conditions',
-    name: 'TermsConditions',
-    component: TermsConditions,
-  },
-  {
-    path: '/help',
-    name: 'Help',
-    component: Help,
-  },
-  {
-    path: '/categories',
-    name: 'ListCategories',
-    component: ListCategories,
-  },
-  { path: '/cart', name: 'Cart', component: Cart },
-  { path: '/register', name: 'Register', component: RegisterView },
-  {
-    path: '/login',
-    name: 'Login',
-    component: Login
-  },
-  {
-    path: '/shop',
-    name: 'shop',
-    component: Shop,
-    children: [
-      {
-        path: 'products', // Esto se convertirá en /shop/products
-        components: {
-          offers: Offers,
-          categories: Categories, // Asumiendo que puedas mostrar ambos en la misma ruta usando named views o similar
-        },
-        meta: { requiresAuth: true },
-      },
-      
-      { path: 'orders', name: 'ShopOrders', component: ShopOrders, meta: { requiresAuth: true } },
-      { path: '/product/update/:id', component: ProductUpdate , meta: { requiresAuth: true }},
-      {
-        path: 'sell', // Esto se convertirá en /shop/sell
-        component: Sell,
-        meta: { requiresAuth: true },
-      },
-      {
-        path: '/mycity',
-        name: 'ShopSearch',
-        component: ListSearch,
-        props: route => ({ shopId: route.query.shopId, isAuthenticate: route.query.isAuthenticate })
-      },
-    ],
-  },
-  {
-    path: '/:pathMatch(.*)*', // Ruta comodín para manejar cualquier ruta no encontrada
-    name: 'NotFound',
-    component: NotFound,
-  },
-  {
-    path: '/shop/:shop_id/products',
-    name: 'ProductShop',
-    component: ProductShop,
-    props: true // Habilita el paso de parámetros como props al componente
-  },
-  // otras rutas...
+
+  // Rutas antiguas -> nuevas
+  { path: '/login', redirect: '/ingresar' },
+  { path: '/register', redirect: '/registro' },
+  { path: '/search', redirect: to => ({ path: '/buscar', query: to.query }) },
+  { path: '/categories', redirect: '/buscar' },
+  { path: '/product/:id', redirect: to => `/producto/${to.params.id}` },
+  { path: '/cart', redirect: '/carrito' },
+  { path: '/about-us', redirect: '/nosotros' },
+  { path: '/help', redirect: '/ayuda' },
+  { path: '/terms-conditions', redirect: '/terminos' },
+  { path: '/shop/settings', redirect: to => ({ path: '/panel/configuracion', query: to.query }) },
+  { path: '/shop/:rest(.*)*', redirect: '/panel' },
+
+  { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
 ];
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-  routes
+  routes,
+  scrollBehavior(to, from, saved) {
+    if (saved) return saved;
+    if (to.path === from.path) return false;
+    return { top: 0 };
+  },
 });
 
-router.beforeEach((to, from, next) => {
-  if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (!store.getters.isLoggedIn) {
-      next({ name: 'Login' });
-    } else {
-      next();
-    }
-  } else {
-    next();
+router.beforeEach((to) => {
+  if (to.matched.some(r => r.meta.requiresAuth) && !store.getters.isLoggedIn) {
+    return { path: '/ingresar', query: { next: to.fullPath } };
   }
+  return true;
 });
 
 export default router;

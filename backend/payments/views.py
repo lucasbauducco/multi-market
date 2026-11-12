@@ -92,7 +92,7 @@ class MercadoPagoCallbackView(views.APIView):
     authentication_classes = []
 
     def get(self, request):
-        back = f'{settings.FRONTEND_URL.rstrip("/")}/shop/settings'
+        back = f'{settings.FRONTEND_URL.rstrip("/")}/panel/configuracion'
         try:
             shop = get_object_or_404(CustomUser, pk=mp.read_state(request.query_params.get('state', '')))
             code = request.query_params.get('code')

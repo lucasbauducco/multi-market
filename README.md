@@ -9,37 +9,61 @@ Marketplace donde varias tiendas publican sus productos y los clientes arman un 
 
 ## Qué incluye
 
-- Catálogo público: búsqueda paginada, categorías, ofertas, detalle de producto.
-- Carrito y checkout sin cuenta; un pedido por tienda; precios y stock calculados en el servidor.
-- Alta de tiendas (`/register`) con aprobación manual desde `/admin/`.
-- Panel de la tienda: productos (con imagen), stock, descuentos y pedidos (confirmar / entregar / cancelar).
+- **Catálogo público:** portada con ofertas y categorías, búsqueda con filtros, ficha con galería, páginas de tienda.
+- **Carrito y checkout por pasos** sin cuenta; un pedido por tienda; precios y stock calculados en el servidor.
+- **Pagos por tienda:** Mercado Pago (Checkout Pro, modelo marketplace), transferencia con comprobante, efectivo/retiro y link de pago propio (Ualá Bis, MODO, etc.). Comisión de la plataforma configurable (0 % por defecto).
+- **Seguimiento de pedidos** por enlace, con confirmación de pago automática (Mercado Pago) o manual (resto).
+- **Alta de tiendas** (`/registro`) con aprobación manual desde `/admin/`.
+- **Panel de la tienda:** resumen, productos (varias imágenes, stock, descuentos), pedidos, perfil público y cobros.
+
+## Pagos
+
+| Medio | Cómo funciona |
+|---|---|
+| **Mercado Pago** | Cada tienda conecta su cuenta por OAuth; se crea una preferencia con el token del vendedor (+ `marketplace_fee`). El webhook valida la firma `x-signature` y **consulta el pago a la API** antes de marcar el pedido como pagado. Los tokens se guardan cifrados. |
+| **Transferencia** | Se muestran alias/CBU; el comprador sube el comprobante y la tienda confirma. |
+| **Efectivo / retiro** | Sin pasarela; la tienda confirma el cobro. |
+| **Link de pago** | La tienda define su link `https://` (Ualá Bis, MODO, PayPal.me…). |
+
+> **Mercado Pago está implementado según la documentación oficial y probado con respuestas simuladas** (tests de OAuth, preferencia, webhook, firma, idempotencia y montos). **Todavía no se validó contra el sandbox real** porque no hay credenciales: al tenerlas, definí `MP_CLIENT_ID`, `MP_CLIENT_SECRET`, `MP_WEBHOOK_SECRET` y `BACKEND_PUBLIC_URL` (https) y probá con usuarios de prueba antes de cobrar.
 
 ## Vista rápida
 
+![Portada de Multi-Market](docs/screenshots/01-home.png)
+
 ### Para compradores
 
-| Ofertas y búsqueda | Categorías |
+| Ofertas y filtros | Ficha de producto con galería |
 |---|---|
-| ![Ofertas](docs/screenshots/02-ofertas.png) | ![Categorías](docs/screenshots/03-categorias.png) |
-| Listado con filtros por precio y orden por descuento. | Productos agrupados por categoría. |
+| ![Ofertas](docs/screenshots/02-ofertas.png) | ![Producto](docs/screenshots/04b-producto-galeria.png) |
+| Filtros por categoría, precio, tienda, descuento y stock; orden y paginación. | Varias fotos, precio con descuento, stock, medios de pago de la tienda y **Comprar ahora**. |
 
-| Detalle de producto | Carrito y checkout |
+| Carrito lateral | Checkout por pasos |
 |---|---|
-| ![Producto](docs/screenshots/04-producto.png) | ![Carrito](docs/screenshots/05-carrito.png) |
-| Precio con descuento, stock, contacto por WhatsApp y botón de carrito. | Carrito persistente; el pedido se divide en uno por tienda. |
+| ![Carrito](docs/screenshots/05-carrito-lateral.png) | ![Pago](docs/screenshots/07-checkout-pago.png) |
+| Se abre al agregar un producto; agrupa por tienda. | Datos → entrega → pago → confirmar. Cada tienda ofrece sus propios medios de pago. |
 
-![Pedido enviado](docs/screenshots/06-pedido-enviado.png)
+| Seguimiento del pedido (sin cuenta) | Página de una tienda |
+|---|---|
+| ![Seguimiento](docs/screenshots/10-seguimiento-pedido.png) | ![Tienda](docs/screenshots/11-tienda.png) |
+| Estado, datos para transferir y subida de comprobante. | Logo, banner, descripción, medios de pago y catálogo propio. |
 
 ### Para tiendas
 
-| Registro de tienda | Panel de la tienda |
+| Resumen | Pedidos |
 |---|---|
-| ![Registro](docs/screenshots/07-registro-tienda.png) | ![Panel](docs/screenshots/08-panel-tienda.png) |
-| Alta pública; un administrador la aprueba. | Productos propios: editar, borrar, vender, ver ofertas. |
+| ![Resumen](docs/screenshots/13-panel-resumen.png) | ![Pedidos](docs/screenshots/15-panel-pedidos.png) |
+| Ventas cobradas, por cobrar, pedidos pendientes y stock bajo. | Confirmar, entregar, cancelar y marcar pagos manuales. |
 
-![Pedidos de la tienda](docs/screenshots/09-pedidos-tienda.png)
+| Productos | Configuración y cobros |
+|---|---|
+| ![Productos](docs/screenshots/14-panel-productos.png) | ![Cobros](docs/screenshots/16-panel-cobros.png) |
+| Alta/edición con varias imágenes, stock y descuentos. | Perfil público, Mercado Pago, transferencia, efectivo/retiro y link de pago. |
 
-> Capturas tomadas con los datos de ejemplo de `seed_demo`.
+<p align="center"><img src="docs/screenshots/17-movil-home.png" width="260" alt="Versión móvil" /> <img src="docs/screenshots/18-movil-producto.png" width="260" alt="Producto en móvil" /></p>
+
+> Capturas tomadas con los datos de `seed_demo` (fotos de [Unsplash](https://unsplash.com/license), ver `backend/demo_assets/CREDITS.md`).
+> Se regeneran con `docs/screenshots/take-screenshots.js` (Playwright; requiere backend en `:8010` y frontend en `:8081` con datos de `seed_demo`).
 
 ## Arranque local
 
@@ -51,7 +75,7 @@ cd backend
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 python manage.py migrate
-python manage.py seed_demo                              # datos de ejemplo (opcional)
+python manage.py seed_demo                              # 6 tiendas y 38 productos con fotos (opcional)
 python manage.py createsuperuser                        # para /admin/ (opcional)
 python manage.py runserver
 
@@ -61,8 +85,8 @@ npm install
 npm run serve
 ```
 
-Tiendas de demo (tras `seed_demo`): `techzone`, `casabella`, `urbanstyle` — contraseña `demo12345`.
-Login de tienda en `/login`. Si el backend corre en otra URL: `frontend/.env.development` → `VUE_APP_API_URL`.
+Tiendas de demo (tras `seed_demo`): `techzone`, `casabella`, `urbanstyle`, `cafeco`, `bellapiel`, `fitzone` — contraseña `demo12345`. Login en `/ingresar`.
+Si el backend corre en otra URL: `frontend/.env.development` → `VUE_APP_API_URL`.
 
 Tests del backend: `cd backend && python manage.py test`.
 

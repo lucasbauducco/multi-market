@@ -1,5 +1,7 @@
 from django.core.paginator import Paginator
-from django.db.models import Q
+from decimal import Decimal, InvalidOperation
+
+from django.db.models import DecimalField, ExpressionWrapper, F, Q
 from rest_framework import generics, permissions, status, views
 from rest_framework.response import Response
 
@@ -112,20 +114,61 @@ class ProductsByShopAndBestDiscountView(views.APIView):
         return Response(ProductSerializer(qs, many=True, context={'request': request}).data)
 
 
+ORDERINGS = {
+    'relevance': ('-discount', '-created_at'),
+    'price_asc': ('final_sort', 'id'),
+    'price_desc': ('-final_sort', 'id'),
+    'discount': ('-discount', '-created_at'),
+    'newest': ('-created_at',),
+}
+
+
+def _num(value):
+    try:
+        return Decimal(value)
+    except (InvalidOperation, TypeError):
+        return None
+
+
 class ProductsSearchView(views.APIView):
-    """Búsqueda paginada. `?query=` busca por tienda, nombre, descripción, subcategoría o categoría."""
+    """
+    Búsqueda y listado con filtros (todos opcionales):
+    query, category, subcategory, shop (id), min_price, max_price (sobre el precio final),
+    discounted=1, in_stock=1, exclude (id de producto), ordering=relevance|price_asc|price_desc|discount|newest,
+    page, limit.
+    """
 
     def get(self, request):
-        query = request.query_params.get('query', '').strip()
-        qs = public_products()
-        if query:
-            for word in query.split():
-                qs = qs.filter(
-                    Q(shop__razon_social__icontains=word) | Q(name__icontains=word) |
-                    Q(description__icontains=word) | Q(subcategory__name__icontains=word) |
-                    Q(subcategory__category__name__icontains=word)
-                )
-        return paginated_response(request, qs.order_by('-discount', '-created_at'), key='products', default_limit=24)
+        q = request.query_params
+        qs = public_products().annotate(
+            final_sort=ExpressionWrapper(F('price') * (100 - F('discount')) / 100, output_field=DecimalField())
+        )
+        query = q.get('query', '').strip()
+        for word in query.split():
+            qs = qs.filter(
+                Q(shop__razon_social__icontains=word) | Q(name__icontains=word) |
+                Q(description__icontains=word) | Q(subcategory__name__icontains=word) |
+                Q(subcategory__category__name__icontains=word)
+            )
+        if q.get('category', '').isdigit():
+            qs = qs.filter(subcategory__category_id=q['category'])
+        if q.get('subcategory', '').isdigit():
+            qs = qs.filter(subcategory_id=q['subcategory'])
+        if q.get('shop', '').isdigit():
+            qs = qs.filter(shop_id=q['shop'])
+        if q.get('exclude', '').isdigit():
+            qs = qs.exclude(pk=q['exclude'])
+        lo, hi = _num(q.get('min_price')), _num(q.get('max_price'))
+        if lo is not None:
+            qs = qs.filter(final_sort__gte=lo)
+        if hi is not None:
+            qs = qs.filter(final_sort__lte=hi)
+        if q.get('discounted') in ('1', 'true'):
+            qs = qs.filter(discount__gt=0)
+        if q.get('in_stock') in ('1', 'true'):
+            qs = qs.filter(Q(stock__isnull=True) | Q(stock__gt=0))
+        qs = qs.order_by(*ORDERINGS.get(q.get('ordering'), ORDERINGS['relevance']))
+        return paginated_response(request, qs.prefetch_related('gallery'), key='products', default_limit=24)
 
 
 search_products = ProductsSearchView.as_view()

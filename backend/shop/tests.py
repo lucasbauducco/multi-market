@@ -216,3 +216,57 @@ class OrderTests(BaseTest):
 
     def test_orders_require_auth(self):
         self.assertEqual(self.client.get('/api/orders/').status_code, 401)
+
+
+class CatalogApiTests(BaseTest):
+    def setUp(self):
+        super().setUp()
+        self.sub2 = SubCategory.objects.create(category=Category.objects.create(name='Hogar'), name='Cocina')
+        self.p3 = Product.objects.create(shop=self.shop_b, name='Olla', description='d', price=300, barcode='O1',
+                                         discount=50, subcategory=self.sub2, stock=0)
+
+    def names(self, qs):
+        return [p['name'] for p in self.client.get(f'/api/search_products/?{qs}').json()['products']]
+
+    def test_filters(self):
+        self.assertEqual(sorted(self.names('category=' + str(self.cat.id))), ['Phone A', 'Phone B'])
+        self.assertEqual(self.names(f'shop={self.shop_b.id}&ordering=price_asc'), ['Olla', 'Phone B'])  # 150 < 200
+        self.assertEqual(self.names('min_price=100&max_price=170'), ['Olla'])
+        self.assertEqual(sorted(self.names('discounted=1')), ['Olla', 'Phone A'])
+        self.assertNotIn('Olla', self.names('in_stock=1'))
+        self.assertNotIn('Phone A', self.names(f'exclude={self.prod_a.id}'))
+        self.assertEqual(self.names('ordering=discount')[0], 'Olla')
+        self.assertEqual(self.names('ordering=price_desc')[0], 'Phone B')
+
+    def test_gallery_images_and_slug(self):
+        self.client.force_authenticate(self.shop_a)
+        with self.settings(MEDIA_ROOT=tempfile.mkdtemp()):
+            r = self.client.post('/api/products/', {
+                'name': 'G', 'description': 'd', 'price': '5', 'barcode': 'G1', 'subcategory': self.sub.id,
+                'image_base64': PNG_1PX, 'images_base64': [PNG_1PX, PNG_1PX]}, format='json')
+        self.assertEqual(r.status_code, 201, r.content)
+        self.assertEqual(len(r.json()['images']), 3)
+        self.assertEqual(self.shop_a.slug, 'shopa')
+
+    def test_home_and_shops(self):
+        h = self.client.get('/api/home/').json()
+        self.assertEqual(h['deals'][0]['name'], 'Olla')
+        self.assertEqual({c['name'] for c in h['categories']}, {'Tech', 'Hogar'})
+        self.assertEqual(len(h['shops']), 2)
+        d = self.client.get('/api/shops/shopa/').json()
+        self.assertEqual((d['razon_social'], d['product_count']), ('Shopa', 1))
+        self.assertEqual(self.client.get('/api/shops/nope/').status_code, 404)
+
+    def test_shop_profile_update_and_dashboard(self):
+        self.client.force_authenticate(self.shop_a)
+        with self.settings(MEDIA_ROOT=tempfile.mkdtemp()):
+            r = self.client.patch('/api/shop/profile/', {'description': 'Hola', 'logo_base64': PNG_1PX}, format='json')
+        self.assertEqual(r.status_code, 200, r.content)
+        self.assertEqual(r.json()['description'], 'Hola')
+        self.assertTrue(r.json()['logo'])
+        d = self.client.get('/api/shop/dashboard/').json()
+        self.assertEqual((d['products_active'], d['orders_total'], d['sales_paid']), (1, 0, '0'))
+        self.assertEqual(d['low_stock'], [])
+        self.assertEqual(self.client.get('/api/shop/dashboard/').status_code, 200)
+        self.client.force_authenticate(None)
+        self.assertEqual(self.client.get('/api/shop/dashboard/').status_code, 401)

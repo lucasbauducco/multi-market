@@ -117,6 +117,7 @@ class ProductSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
     images_base64 = serializers.ListField(child=serializers.CharField(), write_only=True, required=False,
                                           max_length=8)
+    category_id = serializers.IntegerField(source='subcategory.category_id', read_only=True, default=None)
     category_name = serializers.CharField(source='subcategory.category.name', read_only=True, default=None)
     subcategory_name = serializers.CharField(source='subcategory.name', read_only=True, default=None)
 
@@ -124,7 +125,7 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ['id', 'shop', 'shop_name', 'shop_slug', 'name', 'description', 'price', 'discount',
                   'final_price', 'barcode', 'image', 'image_base64', 'images', 'images_base64', 'subcategory',
-                  'category_name', 'subcategory_name', 'stock', 'state', 'created_at']
+                  'category_id', 'category_name', 'subcategory_name', 'stock', 'state', 'created_at']
         read_only_fields = ['shop', 'created_at']
 
     def get_image(self, obj):
@@ -183,6 +184,14 @@ class ProductSerializer(serializers.ModelSerializer):
         product = super().update(instance, validated_data)
         self._save_gallery(product, extra)
         return product
+
+
+class SubCategoryLiteSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source='category.name', read_only=True)
+
+    class Meta:
+        model = SubCategory
+        fields = ['id', 'name', 'category', 'category_name']
 
 
 class SubCategorySerializer(serializers.ModelSerializer):

@@ -1,7 +1,7 @@
 from rest_framework import views, status
 from rest_framework.response import Response
 from shop.models import SubCategory
-from shop.serializers import SubCategorySerializer
+from shop.serializers import SubCategoryLiteSerializer
 class SubCategoryList(views.APIView):
     """
     Vista para listar todas las subcategorías.
@@ -20,9 +20,9 @@ class SubCategoryList(views.APIView):
         # Se puede aplicar alguna lógica para filtrar las subcategorías si es necesario,
         # por ejemplo, basándose en un parámetro de la solicitud.
 
-        subcategories = SubCategory.objects.all()
+        subcategories = SubCategory.objects.select_related('category')
 
         # Usando un serializador para estructurar los datos de las subcategorías
-        serializer = SubCategorySerializer(subcategories, many=True, context={'request': request})
+        serializer = SubCategoryLiteSerializer(subcategories, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)

@@ -209,7 +209,7 @@ class MercadoPagoTests(PaymentBase):
         with mock.patch('payments.providers.mercadopago.requests.post', return_value=token_resp) as post:
             r = self.client.get(f'/api/payments/mercadopago/oauth/callback/?code=TG-123&state={state}')
         self.assertEqual(r.status_code, 302)
-        self.assertTrue(r['Location'].endswith('/shop/settings?mp=connected'))
+        self.assertTrue(r['Location'].endswith('/panel/configuracion?mp=connected'))
         sent = post.call_args.kwargs['json']
         self.assertEqual((sent['grant_type'], sent['code'], sent['client_id']), ('authorization_code', 'TG-123', 'cid'))
         ps = methods.settings_for(self.shop)

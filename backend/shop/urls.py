@@ -2,6 +2,7 @@ from django.urls import include, path
 
 from .Api.auth import VerifyUserToken
 from .Api.category import CategoriesByShopView, CategoriesWithProductsView, CategoryList
+from .Api.home import HomeView, ShopDashboardView
 from .Api.order import CheckoutView, ShopOrderListView, ShopOrderStatusView
 from .Api.product import (
     ProductDeleteView,
@@ -31,6 +32,8 @@ from .Api.user import (
 urlpatterns = [
     # Usuarios / tiendas
     path('', include('payments.urls')),
+    path('home/', HomeView.as_view(), name='home'),
+    path('shop/dashboard/', ShopDashboardView.as_view(), name='shop-dashboard'),
     path('shops/', ShopListView.as_view(), name='shop-list'),
     path('shops/<slug:slug>/', ShopDetailView.as_view(), name='shop-detail'),
     path('shop/profile/', ShopProfileView.as_view(), name='shop-profile'),

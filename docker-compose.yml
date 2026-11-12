@@ -9,6 +9,12 @@ services:
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:8080}
       SQLITE_PATH: /app/data/db.sqlite3
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
+      BACKEND_PUBLIC_URL: ${BACKEND_PUBLIC_URL:-http://localhost:8000}
+      PLATFORM_FEE_PERCENT: ${PLATFORM_FEE_PERCENT:-0}
+      MP_CLIENT_ID: ${MP_CLIENT_ID:-}
+      MP_CLIENT_SECRET: ${MP_CLIENT_SECRET:-}
+      MP_WEBHOOK_SECRET: ${MP_WEBHOOK_SECRET:-}
     volumes:
       - media:/app/media
       - data:/app/data
