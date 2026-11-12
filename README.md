@@ -68,3 +68,12 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
+
+---
+
+# Estructura del repositorio
+
+Este repositorio unifica backend y frontend:
+
+- `backend/`: API Django (`manage.py`, `market/`, `shop/`, `requirements.txt`). Ejecutar los comandos de Python desde esta carpeta.
+- `frontend/`: aplicación Vue (ver `frontend/README.md`). Ejecutar `npm install` y `npm run serve` desde esta carpeta.

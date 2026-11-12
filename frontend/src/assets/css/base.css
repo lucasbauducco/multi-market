@@ -1,0 +1,469 @@
+  @import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,700;1,800;1,900&display=swap');
+  body{
+    margin: 0;
+    padding: 0;
+    font-family: 'Figtree', sans-serif;
+    background-color: #dadada;
+  }
+  #app{
+    margin: 0;
+    padding: 0;
+  }
+  :root{
+    --color-1: #615c5c;
+    --color-2: #e30075;
+    --color-3: #98FF98;
+    --color-4: #ffb319;
+    --color-5: #ebe8e8;
+    --collor-3-dark: #81db812c;
+    --text: #004B49;
+    --text-night: #615c5c;
+  }
+  .title-primary {
+      font-weight: 700;
+      font-size: 2.5em; /* Ajusta según sea necesario */
+      color: var(--color-2);
+      margin-bottom: 0.5em;
+    }
+
+.title-secondary {
+  font-weight: 600;
+  font-size: 4em; /* Ajusta según sea necesario */
+  color: var(--color-4);
+  margin: 0.5em;
+}
+.title-text {
+  font-weight: 400;
+  font-size: 1.5em; /* Ajusta según sea necesario */
+  color: var(--text);
+  line-height: 1.6;
+  margin: 0.5em;
+}
+  .button-no-decorate{
+    background: none; /* Quitar fondo */
+    border: none; /* Quitar bordes */
+    box-shadow: none; /* Quitar sombras */
+    outline: none; /* Quitar contorno al enfocar */
+    color: inherit; /* Color de texto heredado (opcional) */
+    text-decoration: none; /* Quitar decoración de texto (subrayado, etc.) */
+    cursor: pointer; /* Cursor en forma de mano para indicar que es clickeable */
+  }
+  .nav-header{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--color-3);
+    border: 0;
+  }
+  .nav-login{
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .nav-login svg{
+      margin: 10px;
+  }
+  .nav-search{
+    width: 100%;
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    margin: 1rem 1rem;
+  }
+  .nav-logo{
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url("../logo.jpeg");
+    background-size: 200px 64px;
+    height: 64px; 
+    width: 40%; 
+    text-indent: -999px;
+  }
+  .nav-search-form{
+    width: 60%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--color-5);
+    border-radius: 0.2rem;
+    margin: 0 1rem;
+  }
+  .nav-search-input {
+    width: 100%;
+    font-size: 14px; /* Tamaño de fuente legible */
+    background-color: var(--color-5);
+    padding: 0.4rem 1rem;
+    border-top-left-radius: 0.2rem;
+    border-bottom-left-radius: 0.2rem;
+    border: none;
+  }
+  .nav-search-input:focus {
+    border: 2px solid #007bff; /* Borde más delgado y de diferente color cuando está activo */
+    outline: none; /* Elimina el contorno que algunos navegadores agregan por defecto */
+  }
+  .nav-search-btn{
+
+  }
+  .nav-icon-search{
+
+  }
+  .header-nav{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1rem;
+  }
+  .navbar {
+    position: relative;
+    overflow: hidden;
+    background-color: none;  
+  }
+
+  .header-nav  a {
+    color: var(--text);
+    background-color: var(--collor-3-dark);
+    text-align: center;
+    padding: 1rem 2rem;
+    margin: 0 1rem;
+    text-decoration: none;
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .header-nav a.disabled {
+      color: #b8b8b8; /* Un color gris claro para simular el estado deshabilitado */
+      cursor: not-allowed; /* Cambia el cursor para indicar que el elemento está deshabilitado */
+      pointer-events: none; /* Opcional: Evita que el enlace sea clickeable */
+  }
+
+  /* Opcional: Eliminar efectos de hover para enlaces deshabilitados */
+  .header-nav a.disabled:hover {
+      color: #b8b8b8; /* Mantén el mismo color gris sin cambiar al hacer hover */
+  }
+
+
+  .header-nav a:hover {
+    background-color: #ddd;
+    color: black;
+  }
+
+  .header-nav a.active {
+    background-color: #04AA6D;
+    color: white;
+  }
+
+  .header-nav .icon {
+    display: none;
+  }
+  .carousel{
+    position: relative;
+    display: inline-block; /* O 'block' dependiendo de tu necesidad */
+    width: 100%; /* Hace que el contenedor sea responsivo */
+  }
+  .slide{
+    max-width: 1920px !important;
+    max-height: 500px !important;
+  }
+  .carousel__next{
+    width: 64px;
+  }
+  .carousel__prev{
+    width: 64px;
+  }
+  .carousel__icon{
+    color: var(--color-2);
+    display: none;
+    /* Agregar un fondo blanco */
+    background-color: var(--color-5);
+
+    /* Hacer que el fondo sea un círculo */
+    border-radius: 50%;
+    align-items: center !important;
+    justify-content: center !important;
+
+  }
+  .carousel__pagination{
+    transform: translateY(-10vw);
+    z-index: 1;
+  }
+  .carousel__pagination-button::after{
+    display: block !important;
+    content: ''!important;
+    width: 5px!important; /* Tamaño del círculo (ancho) */
+    height: 5px!important; /* Tamaño del círculo (alto) */
+    border-radius: 50% !important;
+    border: 1px solid var(--color-5)!important; /* Bordes blancos */
+  }
+  .carousel:hover .carousel__icon{
+    display: flex;
+  }
+  .carousel__pagination-button--active::after{
+    background-color: rgba(255, 0, 0, 0.493); /* Fondo negro */
+  }
+  .container-offers {
+    top: 100%;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    margin-top: -8%; 
+  }
+  
+  .card-body {
+    margin: 0.5rem;
+  }
+  .category{
+    background-color: aliceblue;
+    border-radius: 10px;
+    margin: 2rem 1rem;
+  }
+  .menu-shop{
+    width: 100%;
+    background-color: var(--color-5);
+    display: flex;
+    justify-content: space-between;
+    .logo-shop{
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      gap: 1rem;
+      .name-shop{
+        font-size: 4vw;
+        font-weight: bold;
+        color: var(--color-1);
+      }
+    }
+    .circular-image {
+      border-radius: 50%;  /* Hace que la imagen sea circular */
+      width: 8vw;       /* Ancho de la imagen */
+      height: 8vw;      /* Altura de la imagen */
+      background-color: var(--color-3);
+      object-fit: scale-down;  /* Asegura que la imagen cubra completamente el área sin estirarse */
+    }
+    .list-menu-shop{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+    .list-menu-shop a{
+      margin: 0 1rem;
+      font-size: 3vw;
+      color: var(--text);
+      text-align: center;
+      text-decoration: none; 
+    }
+  }
+  .cards-content {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+    padding: 1rem;
+    .offers{
+      background-color: var(--color-2);
+    }
+    .btn-pagination-cards {
+      display: flex;
+      justify-content: space-between;
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      transform: translateY(-50%);
+    }
+
+    .pagination-spacer {
+      flex-grow: 1;
+    }
+  }
+  .cards-content:hover .carousel__icon{
+      display: flex;
+    }
+
+  .card {
+    position: relative;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 200px;
+    height: 400px
+  }
+
+  .card-image {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+  }
+
+  .card-title {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  .card-description {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 10px;
+  }
+
+  .card-price{
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 18px;
+  }
+  .card-price .total{
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 18px;
+  }
+  .cross-out{
+    text-decoration: line-through;
+  }
+  .card-discount {
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 12px;
+  }
+  .btn-card{
+    position: absolute;
+    bottom: 0px; /* Ajusta según sea necesario */
+    right: 10px; /* Ajusta según sea necesario */
+    z-index: 10;
+  }
+  .btn-card button {
+    font-size: 8px; /* Pequeños pero legibles */
+    padding: 0.5rem 0.5rem; /* Espaciado interno suficiente para que sean fáciles de clicar */
+    border: none; /* Sin bordes para un diseño más limpio */
+    border-radius: 5px; /* Bordes ligeramente redondeados */
+    cursor: pointer; /* Cambiar el cursor para indicar que es clickeable */
+    transition: background-color 0.3s ease; /* Transición suave al cambiar el estado */
+  }
+  
+  .btn-card button:nth-child(1) {
+    background-color: var(--color-2); /* Color primario para 'Editar' */
+    color: var(--color-5); /* Texto claro sobre fondo oscuro */
+  }
+  
+  .btn-card button:nth-child(2) {
+    background-color: var(--color-4); /* Color de advertencia para 'Eliminar' */
+    color: var(--color-5); /* Texto claro sobre fondo oscuro */
+  }
+  
+  .btn-card button:hover {
+    opacity: 0.8; /* Efecto al pasar el mouse para mejorar la interactividad */
+  }
+  
+  .footer-container {
+    position: relative;
+    bottom: 0;
+    background: var(--color-5);
+    color: var(--text);
+    padding: 20px;
+    font-family: 'Figtree', sans-serif;
+  }
+  
+  .footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .social-links a {
+    color: var(--color-2);
+    margin: 0 10px;
+    font-size: 1.5em;
+  }
+  
+  .footer-links {
+    margin: 20px 0;
+  }
+  
+  .footer-links a {
+    color: var(--text);
+    text-decoration: none;
+    margin: 0 10px;
+  }
+  
+  .footer-links a:hover {
+    color: var(--color-2);
+  }
+  
+  .copy-right {
+    color: var(--text-night);
+    margin-top: 10px;
+  }
+  @media screen and (max-width: 768px) {
+    .carousel__icon{
+      display: block;
+    }
+    .card {
+      max-width: 150px;
+      height: 300px
+    }
+  
+    .card-image {
+      width: 150px;
+      height: 150px;
+      object-fit: contain;
+    }
+    .card-title {
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+    .card-price{
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 12px;
+    }
+    .total{
+      font-size: 18px !important;
+    }
+    .carousel__icon {
+      width: 30px !important; 
+      height: 30px !important;;
+      fill: currentColor;
+    }
+    .footer-content {
+      flex-direction: column;
+    }
+  
+    .social-links a, .footer-links a {
+      font-size: 1em; /* Ajusta el tamaño de la fuente para mejorar la legibilidad en dispositivos más pequeños */
+      margin: 5px; /* Reduce el espacio para evitar desbordamiento */
+    }
+  
+    .copy-right {
+      font-size: 0.8em; /* Ajusta el tamaño de la fuente para el copyright en dispositivos más pequeños */
+    }
+  }
+  @media screen and (max-width: 1000px) {
+    .nav-search-form {
+        width: 50%;
+    }
+    .header-nav.responsive .icon {
+
+    }
+    .header-nav.responsive .nav-toggle {
+      position: absolute;
+      top: 12rem;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+
+      background-color: var(--color-3);
+      z-index: 1;
+    }
+    .nav-toggle{
+      display: none;
+    }
+    .header-nav a.icon {
+      float: right;
+      display: block;
+    }
+
+}
