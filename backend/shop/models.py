@@ -1,9 +1,7 @@
 from django.db import models
+from decimal import Decimal
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
-import base64
-import json
-from django.core.files.base import ContentFile
 from phonenumber_field.modelfields import PhoneNumberField
 class User_Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -57,36 +55,62 @@ class SubCategory(models.Model):
     def __str__(self):
         return self.name
 class Product(models.Model):
+    STATE_CHOICES = (('active', 'Active'), ('inactive', 'Inactive'))
+
     shop = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='shop_products')
     name = models.CharField(max_length=200)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     barcode = models.CharField(max_length=100, unique=True)
     discount = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
-    image_base64 = models.TextField(blank=True, null=True)  # Campo para almacenar imagen en base64
+    image = models.ImageField(upload_to='products/', blank=True, null=True)
+    # Campo heredado (imágenes antiguas en base64). Las nuevas se guardan en `image`.
+    image_base64 = models.TextField(blank=True, null=True)
     subcategory = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
+    # None = stock ilimitado / no controlado.
+    stock = models.PositiveIntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    state = models.CharField(max_length=12, default='active', choices=(('active', 'Active'), ('inactive', 'Inactive')))
+    state = models.CharField(max_length=12, default='active', choices=STATE_CHOICES)
+
     def __str__(self):
         return self.name
 
-    def set_image_from_base64(self, base64_str):
-        """
-        Decodifica una imagen en formato base64 y la guarda en el campo de imagen.
-        """
-        if base64_str:
-            format, imgstr = base64_str.split(';base64,') 
-            ext = format.split('/')[-1] 
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-            self.image.save(name=self.name + '.' + ext, content=data, save=False)
+    @property
+    def final_price(self):
+        return (Decimal(self.price) * (100 - Decimal(self.discount)) / 100).quantize(Decimal('0.01'))
 
-    def get_image_as_base64(self):
-        """
-        Devuelve la imagen en formato base64.
-        """
-        try:
-            with open(self.image.path, "rb") as img_file:
-                return base64.b64encode(img_file.read()).decode('utf-8')
-        except (ValueError, FileNotFoundError):
-            return None
-        
+
+class Order(models.Model):
+    """Pedido de un comprador a UNA tienda (un checkout multi-tienda genera varios pedidos)."""
+    STATUS_CHOICES = (
+        ('pending', 'Pendiente'),
+        ('confirmed', 'Confirmado'),
+        ('delivered', 'Entregado'),
+        ('cancelled', 'Cancelado'),
+    )
+    shop = models.ForeignKey(CustomUser, on_delete=models.PROTECT, related_name='orders')
+    buyer_name = models.CharField(max_length=120)
+    buyer_phone = models.CharField(max_length=40)
+    buyer_email = models.EmailField(blank=True)
+    notes = models.TextField(blank=True)
+    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default='pending')
+    total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Pedido #{self.pk} - {self.buyer_name}'
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, null=True, on_delete=models.SET_NULL)
+    name = models.CharField(max_length=200)  # copia del nombre al momento de la compra
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)  # precio final con descuento
+    quantity = models.PositiveIntegerField()
+
+    @property
+    def subtotal(self):
+        return self.unit_price * self.quantity

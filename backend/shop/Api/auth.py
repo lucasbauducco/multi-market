@@ -23,19 +23,24 @@ class LoginView(views.APIView):
     Vista para autenticar usuarios. Toma un nombre de usuario y contraseña,
     autentica al usuario, y devuelve un token de autenticación si es exitoso.
     """
+    permission_classes = [permissions.AllowAny]
+    throttle_scope = 'login'
+
     def post(self, request, *args, **kwargs):
         username = request.data.get('username')
         password = request.data.get('password')
 
         user = authenticate(request, username=username, password=password)
 
-        if user is not None:
+        if user is not None and user.is_active:
             # Obtiene o crea un token para el usuario autenticado
             token, created = Token.objects.get_or_create(user=user)
             # Devuelve el token y el username como respuesta
             return Response({
                 'token': token.key,
-                'username': username  # Asegúrate de que el manejo del username aquí es seguro y adecuado para tu caso de uso
+                'username': user.get_username(),
+                'user_id': user.pk,
+                'razon_social': user.razon_social
             }, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Credenciales inválidas o usuario no encontrado'}, status=status.HTTP_401_UNAUTHORIZED)

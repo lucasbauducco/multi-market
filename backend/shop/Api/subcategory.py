@@ -23,6 +23,6 @@ class SubCategoryList(views.APIView):
         subcategories = SubCategory.objects.all()
 
         # Usando un serializador para estructurar los datos de las subcategorías
-        serializer = SubCategorySerializer(subcategories, many=True)
+        serializer = SubCategorySerializer(subcategories, many=True, context={'request': request})
 
         return Response(serializer.data, status=status.HTTP_200_OK)

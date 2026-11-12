@@ -1,7 +1,9 @@
 from rest_framework import views, permissions, status, generics
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-from shop.serializers import CustomUserSerializer, StateChangeSerializer, CustomUserDetailSerializer
+from rest_framework.exceptions import PermissionDenied
+from shop.serializers import (CustomUserSerializer, StateChangeSerializer, CustomUserDetailSerializer,
+                              ShopRegisterSerializer)
 from django.shortcuts import get_object_or_404
 from shop.models import UserHistory
 import json
@@ -75,22 +77,34 @@ class ChangeUserStateView(views.APIView):
             UserHistory.objects.create(
                 user=user,
                 modified_by=request.user,
-                changes=f"State changed to {user.state}",
+                changes=f"State changed to {user.state.name}",
                 motive=serializer.validated_data.get('motive', '')
             )
             return Response({'status': 'state changed'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class CustomUserDetailView(generics.ListAPIView):
+class CustomUserDetailView(generics.RetrieveAPIView):
+    """Perfil de un usuario: solo el propio o un administrador."""
     queryset = User.objects.all()
     serializer_class = CustomUserDetailSerializer
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'username'
 
-    def get_permissions(self):
-        """
-        Permite al usuario acceder a su propio perfil o a administradores.
-        """
-        if self.request.user.username == self.kwargs['username'] or self.request.user.is_staff:
-            return [permissions.IsAuthenticated()]
-        return [permissions.IsAdminUser()]
+    def get_object(self):
+        obj = super().get_object()
+        if obj != self.request.user and not self.request.user.is_staff:
+            raise PermissionDenied()
+        return obj
+
+
+class RegisterShopView(views.APIView):
+    """Alta pública de tienda. La cuenta queda inactiva hasta que un administrador la apruebe."""
+    permission_classes = [permissions.AllowAny]
+    throttle_scope = 'register'
+
+    def post(self, request):
+        serializer = ShopRegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'detail': 'Registro recibido. Tu tienda será activada tras la revisión.'},
+                        status=status.HTTP_201_CREATED)
