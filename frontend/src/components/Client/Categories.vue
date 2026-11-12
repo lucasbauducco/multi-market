@@ -9,7 +9,7 @@
           <div class="cards-content">
             <div class="card" v-for="product in paginatedProductsCategory(category.id)" :key="product.id">
               <router-link :to="{ name: 'ProductDetails', params: { productId: product.id } }" class="card-link">
-                <img :src="product.image_base64" alt="Imagen del producto" class="card-image">
+                <img :src="product.image" alt="Imagen del producto" class="card-image">
                 <div class="card-body">
                   <h3 class="card-title">{{ product.name }}</h3>
                   <div v-if="product.discount!=0">
@@ -49,7 +49,7 @@
   </template>
   
   <script>
-  import axios from 'axios';
+  import api from '@/api';
   export default {
     name: 'ShopCategories',
     props: ['shopId', 'isAuthenticate'],
@@ -100,7 +100,7 @@
               'Authorization': `Token ${token}` // Usa 'Bearer' en lugar de 'Token' si es el esquema esperado por tu backend
             }
           };
-            await axios.delete(`http://127.0.0.1:8000/api/products/delete/${productId}/`, config);
+            await api.delete(`/api/products/delete/${productId}/`, config);
             this.categories.forEach(category => {
               category.products = category.products.filter(product => product.id !== productId);
             });
@@ -122,7 +122,7 @@
           return;
         }
         try {
-          const response = await axios.get(`http://127.0.0.1:8000/api/products/shop/${this.shopId}/category/${categoryId}`);
+          const response = await api.get(`/api/products/shop/${this.shopId}/category/${categoryId}`);
             // Asigna el array de resultados a la categoría
             if(response.data.results && response.data.results.length > 0){
                 this.categories[categoryIndex].productsLoaded = true;
@@ -157,7 +157,7 @@
       },
       async loadCategories() {
           try {
-              const response = await axios.get(`http://127.0.0.1:8000/api/categories/shop/${this.shopId}`);
+              const response = await api.get(`/api/categories/shop/${this.shopId}`);
               // Asegúrate de inicializar currentPage para cada categoría
               this.categories = response.data.map(category => ({ ...category, productsLoaded: false, currentPage: 0 }));
               this.$nextTick(() => {

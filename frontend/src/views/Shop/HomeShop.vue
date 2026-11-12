@@ -15,6 +15,7 @@
 
 
       <router-link to="/shop/sell">Vender</router-link>
+      <router-link to="/shop/orders">Pedidos</router-link>
     </div>
   </section>
   <router-view :shopId="shopId"></router-view>
@@ -24,7 +25,7 @@
 </template>
   
 <script>
-  import axios from 'axios';
+  import api from '@/api';
   import router from '@/router';
   export default {
     name: 'HomeShop',
@@ -68,7 +69,7 @@
               'Authorization': `Token ${token}`
             }
           };
-          await axios.post('http://127.0.0.1:8000/api/token/verify/', { token, user_id }, config); // Asume que este endpoint verifica el token
+          await api.post('/api/token/verify/', { token, user_id }, config); // Asume que este endpoint verifica el token
           this.isAuthenticate= true;
           return true; // El token es válido
         } catch (error) {
@@ -89,8 +90,8 @@
               'Authorization': `Token ${token}`
             }
           };
-        const response = await axios.get(`http://127.0.0.1:8000/api/users/${username}/`, config);
-        this.userData = response.data[0];
+        const response = await api.get(`/api/users/${username}/`, config);
+        this.userData = response.data;
         console.log(response.data)
         this.name = this.userData.razon_social; // O cualquier otro campo relevante
         this.shopId = this.userData.id;

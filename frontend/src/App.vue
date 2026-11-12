@@ -6,9 +6,9 @@
       </svg>
     </router-link>
     <div class="nav-search">
-      <a class="nav-logo" href="/">
+      <router-link class="nav-logo" to="/">
         Todo lo tenes en Ciudad Oferta
-      </a>
+      </router-link>
       <form class="nav-search-form" @submit.prevent="search">
         <label for="cb1-edit"></label>
         <input v-model="searchQuery" id="cb1-edit" type="text" class="nav-search-input">
@@ -40,9 +40,7 @@
               Ofertas
             </router-link>
 
-            <a class="disabled" href="#contact">Historial</a>
-            <a class="disabled" href="#about">Supermedado</a>
-            <a class="disabled" href="#about">Indumentaría</a>
+            <router-link to="/cart" class="cart-link">Carrito<span v-if="cartCount" class="cart-badge">{{ cartCount }}</span></router-link>
       </div>
     </div>
   </header>
@@ -59,10 +57,9 @@
       </div>
       <div class="footer-links">
         <a href="https://autogestion.produccion.gob.ar/consumidores" target="_blank" rel="noopener noreferrer">Defensa del Consumidor</a>
-        <a href="/soporte-tecnico">Soporte Técnico</a>
-        <router-link to="/about-us">¿Quiénes Somos?</router-link> <!-- Enlace a AboutUs -->
-        <a href="/help">Ayuda</a>
-        <a href="/terms-conditions">Términos y Condiciones</a>
+                <router-link to="/about-us">¿Quiénes Somos?</router-link> <!-- Enlace a AboutUs -->
+        <router-link to="/help">Ayuda</router-link>
+        <router-link to="/terms-conditions">Términos y Condiciones</router-link>
       </div>
       <p class="copy-right">© 2024 MultiMercados. Todos los derechos reservados.</p>
     </div>
@@ -72,7 +69,9 @@
 
 <script>
 import './assets/css/base.css';
+import { mapGetters } from 'vuex';
 export default {
+  computed: { ...mapGetters(['cartCount']) },
   data() {
     return {
       searchQuery: '',
@@ -96,6 +95,5 @@ export default {
 };
 </script>
 <style>
-
-  
+.cart-badge { background: #e53935; color: #fff; border-radius: 10px; padding: 0 .45rem; margin-left: .3rem; font-size: .75rem; }
 </style>

@@ -4,7 +4,7 @@
         <div class="cards-content offers">
         <div class="card" v-for="product in paginatedProducts" :key="product.id">
           <router-link :to="{ name: 'ProductDetails', params: { productId: product.id } }" class="card-link">
-            <img :src="product.image_base64" alt="Imagen del producto" class="card-image">
+            <img :src="product.image" alt="Imagen del producto" class="card-image">
             <div class="card-body">
             <h3 class="card-title">{{ product.name }}</h3>
             <div v-if="product.discount!=0">
@@ -43,7 +43,7 @@
   </template>
   
   <script>
-  import axios from 'axios';
+  import api from '@/api';
   export default {
     name: 'ShopOffers',
     props: ['shopId', 'isAuthenticate'],
@@ -64,13 +64,8 @@
     methods: {
         async loadProducts() {
           try {
-              const response = await fetch(`http://127.0.0.1:8000/api/products/shop/${this.shopId}/best_discount/`);
-              if (response.ok) {
-              const data = await response.json();
-              this.products = data; // Asumiendo que la API devuelve un array de productos
-              } else {
-              console.error("Failed to fetch products");
-              }
+              const response = await api.get(`/api/products/shop/${this.shopId}/best_discount/`);
+              this.products = response.data;
           } catch (error) {
               console.error("Error fetching products:", error);
           }
@@ -86,7 +81,7 @@
               'Authorization': `Token ${token}` // Usa 'Bearer' en lugar de 'Token' si es el esquema esperado por tu backend
             }
           };
-            await axios.delete(`http://127.0.0.1:8000/api/products/delete/${productId}/`, config);
+            await api.delete(`/api/products/delete/${productId}/`, config);
             this.products = this.products.filter(product => product.id !== productId);
             alert('Producto eliminado exitosamente');
             // Aquí podrías también actualizar la lista de productos en el cliente, si es necesario

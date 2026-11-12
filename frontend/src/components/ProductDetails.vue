@@ -1,7 +1,7 @@
 <template>
     <div class="product-details">
         <div class="product-image">
-            <img :src="product.image_base64 ? product.image_base64 : defaultImage" alt="Imagen del producto">
+            <img :src="product.image || defaultImage" alt="Imagen del producto">
         </div>
         <div class="product-info">
           <h2 class="product-name">{{ product.name }}</h2>
@@ -11,6 +11,14 @@
                   <div class="card-price">Precio: ${{ product.price - ((product.discount * product.price) / 100 )}}</div>
             </div>
             <div class="product-price card-price" v-else >Precio: ${{ product.price }}</div>
+            <div class="product-stock" v-if="product.stock !== null && product.stock !== undefined">
+              {{ product.stock > 0 ? `Stock: ${product.stock}` : 'Sin stock' }}
+            </div>
+            <div class="add-cart">
+              <input type="number" min="1" :max="product.stock || 999" v-model.number="quantity" />
+              <button :disabled="product.stock === 0" @click="addToCart">Agregar al carrito</button>
+              <span v-if="added" class="added">Agregado ✔ <router-link to="/cart">Ver carrito</router-link></span>
+            </div>
             <div class="product-description">
               <span>Descripción:</span>
               {{ product.description  }}
@@ -21,9 +29,9 @@
                 {{ shop.razon_social }}
               </div>
               <div>
-                <button @click="contactarWhatsApp(shop.telefono)">Contactar por WhatsApp</button>
+                <button v-if="shop.telefono" @click="contactarWhatsApp(shop.telefono)">Contactar por WhatsApp</button>
               </div>
-              <a href="mailto:shop.email">
+              <a :href="`mailto:${shop.email}`">
                 <img :src="emailIconPath" alt="go to email">
               </a>
               <div>
@@ -41,7 +49,7 @@
   </template>
   
   <script>
-  import axios from 'axios';
+  import api from '@/api';
   import defaultImage from '@/assets/image/product/noImage.png';
   export default {
     props: ['productId'],
@@ -49,15 +57,30 @@
       return {
         emailIconPath: require('@/assets/svg/email_black_24dp.svg'),
         shop: {},
+        quantity: 1,
+        added: false,
         product: {
-            image_base64: defaultImage,
+            image: defaultImage,
         }
         // Aquí iría la lógica para obtener los detalles del producto utilizando el productId
       };
     },
     methods: {
+      addToCart() {
+        const qty = Math.max(1, parseInt(this.quantity) || 1);
+        this.$store.dispatch('addToCart', {
+          id: this.product.id,
+          name: this.product.name,
+          price: parseFloat(this.product.final_price),
+          image: this.product.image,
+          shop_name: this.shop.razon_social || this.product.shop_name,
+          quantity: qty,
+        });
+        this.added = true;
+      },
       contactarWhatsApp(numero) {
-        const urlWhatsApp = `https://wa.me/${numero}`;
+        if (!numero) return;
+        const urlWhatsApp = `https://wa.me/${String(numero).replace(/\D/g, '')}`;
         // Redirige al usuario a la URL
         window.open(urlWhatsApp, '_blank');
       },
@@ -67,10 +90,10 @@
       },
       async fetchProductDetails() {
         const productId = this.$route.params.productId; // Asumiendo que estás usando vue-router
-        await axios.get(`http://127.0.0.1:8000/api/product/${productId}/`)
+        await api.get(`/api/product/${productId}/`)
           .then(async response => {
             this.product = response.data;
-            await axios.get(`http://127.0.0.1:8000/api/product/${productId}/shop/`)  // Ajusta la URL según tu configuración de URL
+            await api.get(`/api/product/${productId}/shop/`)  // Ajusta la URL según tu configuración de URL
               .then(response => {
                 this.shop = response.data;  // Guarda la información del shop
               })

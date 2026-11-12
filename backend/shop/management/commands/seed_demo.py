@@ -38,11 +38,12 @@ class Command(BaseCommand):
                            ('Zapatillas urbanas', 'Suela de goma, livianas', 72000, 5, 'Zapatillas')],
         }
         n = 0
-        for username, razon, cuit, _cat in SHOPS:
+        for idx, (username, razon, cuit, _cat) in enumerate(SHOPS):
             shop, created = CustomUser.objects.get_or_create(
                 username=username,
                 defaults=dict(razon_social=razon, cuit=cuit, domicilio_fiscal='Av. Siempreviva 123',
-                              ingresos_brutos=cuit, email=f'{username}@example.com'),
+                              ingresos_brutos=cuit, email=f'{username}@example.com',
+                              telefono=f'+54911555500{idx:02d}'),
             )
             if created:
                 shop.set_password('demo12345')

@@ -12,7 +12,7 @@
     <div class="container-list">
       <div class="card" v-for="product in filteredProducts" :key="product.id">
         <router-link :to="{ name: 'ProductDetails', params: { productId: product.id } }" class="card-link">
-          <img :src="product.image_base64" alt="Imagen del producto" class="card-image">
+          <img :src="product.image" alt="Imagen del producto" class="card-image">
           <div class="card-body">
           <h3 class="card-title">{{ product.name }}</h3>
           <div v-if="product.discount!=0">
@@ -51,7 +51,7 @@
   </template>
   
   <script>
- import axios from 'axios';
+ import api from '@/api';
   export default {
     props: ['shopId', 'isAuthenticate'],
     data() {
@@ -116,7 +116,7 @@
               'Authorization': `Token ${token}` // Usa 'Bearer' en lugar de 'Token' si es el esquema esperado por tu backend
             }
           };
-            await axios.delete(`http://127.0.0.1:8000/api/products/delete/${productId}/`, config);
+            await api.delete(`/api/products/delete/${productId}/`, config);
             this.categories.forEach(category => {
               category.products = category.products.filter(product => product.id !== productId);
             });
@@ -128,18 +128,12 @@
           }
       },
     async fetchSearchResults(query) {
-      const url = `http://localhost:8000/api/search_products/?query=${query}`; // Construir la URL
-
       try {
-        const response = await fetch(url); // Realizar la solicitud al backendf
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`); // Manejar respuestas no exitosas
-        }
-        const data = await response.json(); // Parsear la respuesta JSON
-        this.searchResults = data; // Actualizar el estado con los resultados
+        const response = await api.get('/api/search_products/', { params: { query, limit: 100 } });
+        this.searchResults = response.data;
         await this.applyFilters();
       } catch (error) {
-        console.error("Fetch error:", error); // Manejar errores en la solicitud
+        console.error('Error al buscar productos:', error);
       }
     },
     filterAndSortResults() {

@@ -1,0 +1,24 @@
+# Demo local: docker compose up --build
+# Para producción: definir DJANGO_SECRET_KEY, DJANGO_ALLOWED_HOSTS, CORS_ALLOWED_ORIGINS y una BD gestionada.
+services:
+  backend:
+    build: ./backend
+    environment:
+      DJANGO_DEBUG: "False"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?definí DJANGO_SECRET_KEY}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:8080}
+      SQLITE_PATH: /app/data/db.sqlite3
+    volumes:
+      - media:/app/media
+      - data:/app/data
+    ports: ["8000:8000"]
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VUE_APP_API_URL: ${VUE_APP_API_URL:-http://localhost:8000}
+    ports: ["8080:80"]
+volumes:
+  media:
+  data:

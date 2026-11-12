@@ -55,7 +55,7 @@
   </template>
   
   <script>
-  import axios from 'axios';
+  import api from '@/api';
   
   export default {
     name: 'SellShop',
@@ -91,7 +91,7 @@
             }
         },
         fetchSubcategories() {
-            axios.get('http://127.0.0.1:8000/api/subcategories/')
+            api.get('/api/subcategories/')
                 .then(response => {
                 this.subcategories = response.data;
                 })
@@ -121,7 +121,7 @@
             };
             const productData = this.product;
             // Realiza la solicitud POST con Axios
-            axios.post('http://127.0.0.1:8000/api/products/', productData, config)
+            api.post('/api/products/', productData, config)
             .then(response => {
                 alert('Producto creado con éxito', response);
                 // Opcional: redirigir o limpiar el formulario aquí

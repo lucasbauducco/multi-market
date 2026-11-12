@@ -39,7 +39,7 @@
       </form>
     </section>
     <div class="card" :key="product.id">
-        <img :src="product.image_base64" alt="Imagen del producto" class="card-image">
+        <img :src="product.image" alt="Imagen del producto" class="card-image">
         <div class="card-body">
         <h3 class="card-title">{{ product.name }}</h3>
         <p class="card-description">{{ product.description }}</p>
@@ -52,7 +52,7 @@
   </template>
   
   <script>
-  import axios from 'axios';
+  import api from '@/api';
   
   export default {
     data() {
@@ -89,7 +89,7 @@
           'Authorization': `Token ${token}` // Usa 'Bearer' en lugar de 'Token' si es el esquema esperado por tu backend
           }
         };
-          const response = await axios.get(`http://127.0.0.1:8000/api/product/${productId}/`, config);
+          const response = await api.get(`/api/products/${productId}/`, config);
           this.product = { ...this.product, ...response.data };
           this.filterOptions();
         } catch (error) {
@@ -107,7 +107,7 @@
           'Authorization': `Token ${token}` // Usa 'Bearer' en lugar de 'Token' si es el esquema esperado por tu backend
           }
         };
-        axios.put(`http://127.0.0.1:8000/api/product/${productId}/`, this.product, config)
+        api.patch(`/api/products/${productId}/`, this.product, config)
           .then(response => {
             alert('Product updated successfully', response);
             // Redirect or perform some action upon success
@@ -125,7 +125,7 @@
           }
         },
         fetchSubcategories() {
-            axios.get('http://127.0.0.1:8000/api/subcategories/')
+            api.get('/api/subcategories/')
                 .then(response => {
                   this.subcategories = response.data;
                   this.setInitialSubcategory();

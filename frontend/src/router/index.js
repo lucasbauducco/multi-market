@@ -16,6 +16,9 @@ import ProductShop from '../components/Client/ListSearch.vue'
 import AboutUs from '../components/Client/AboutUs.vue'
 import TermsConditions from '../components/TermsConditions.vue'
 import Help from '../components/Help.vue'
+import Cart from '../components/Client/Cart.vue'
+import RegisterView from '../components/Shop/RegisterView.vue'
+import ShopOrders from '../components/Shop/ShopOrders.vue'
 
 const routes = [
 {
@@ -63,6 +66,8 @@ const routes = [
     name: 'ListCategories',
     component: ListCategories,
   },
+  { path: '/cart', name: 'Cart', component: Cart },
+  { path: '/register', name: 'Register', component: RegisterView },
   {
     path: '/login',
     name: 'Login',
@@ -82,6 +87,7 @@ const routes = [
         meta: { requiresAuth: true },
       },
       
+      { path: 'orders', name: 'ShopOrders', component: ShopOrders, meta: { requiresAuth: true } },
       { path: '/product/update/:id', component: ProductUpdate , meta: { requiresAuth: true }},
       {
         path: 'sell', // Esto se convertirá en /shop/sell
