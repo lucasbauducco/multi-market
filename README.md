@@ -5,6 +5,7 @@ Marketplace donde varias tiendas publican sus productos y los clientes arman un 
 - `backend/`: API Django REST (JWT/Token, SQLite por defecto).
 - `frontend/`: SPA Vue 3 (vue-cli, vuex, vue-router).
 - `docs/PLAN.md`: plan de mejoras y estado.
+- `docs/PLAN-FRONT.md`: plan de rediseño del frontend y pagos (Mercado Pago).
 
 ## Qué incluye
 
