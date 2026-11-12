@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from decimal import Decimal
 from django.contrib.auth.models import AbstractUser
@@ -31,6 +32,21 @@ class CustomUser(AbstractUser):
     ingresos_brutos = models.CharField(max_length=50)
     inicio_actividades = models.DateField(null=True, blank=True)
     telefono = PhoneNumberField(null=True, blank=True, unique=True, region="AR")
+    # Perfil público de la tienda (página /tienda/<slug>)
+    slug = models.SlugField(max_length=60, unique=True, null=True, blank=True)
+    logo = models.ImageField(upload_to='shops/logos/', null=True, blank=True)
+    banner = models.ImageField(upload_to='shops/banners/', null=True, blank=True)
+    description = models.TextField(blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug and self.razon_social:
+            from django.utils.text import slugify
+            base = slugify(self.razon_social)[:50] or self.username
+            slug, n = base, 2
+            while CustomUser.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug, n = f'{base}-{n}', n + 1
+            self.slug = slug
+        super().save(*args, **kwargs)
 class UserHistory(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='history')
     modified_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='modified_users')
@@ -80,6 +96,16 @@ class Product(models.Model):
         return (Decimal(self.price) * (100 - Decimal(self.discount)) / 100).quantize(Decimal('0.01'))
 
 
+class ProductImage(models.Model):
+    """Imágenes adicionales de un producto (la principal sigue en Product.image)."""
+    product = models.ForeignKey(Product, related_name='gallery', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='products/')
+    position = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ['position', 'id']
+
+
 class Order(models.Model):
     """Pedido de un comprador a UNA tienda (un checkout multi-tienda genera varios pedidos)."""
     STATUS_CHOICES = (
@@ -96,6 +122,20 @@ class Order(models.Model):
     status = models.CharField(max_length=12, choices=STATUS_CHOICES, default='pending')
     total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # Entrega y pago
+    DELIVERY_CHOICES = (('shipping', 'Envío'), ('pickup', 'Retiro en local'))
+    PAYMENT_METHODS = (('mercadopago', 'Mercado Pago'), ('transfer', 'Transferencia'),
+                       ('cash', 'Efectivo / retiro'), ('link', 'Link de pago'))
+    PAYMENT_STATUS = (('unpaid', 'Sin pagar'), ('pending', 'Pago pendiente'), ('paid', 'Pagado'),
+                      ('failed', 'Rechazado'), ('refunded', 'Reembolsado'))
+    delivery_method = models.CharField(max_length=10, choices=DELIVERY_CHOICES, default='pickup')
+    shipping_address = models.CharField(max_length=250, blank=True)
+    payment_method = models.CharField(max_length=12, choices=PAYMENT_METHODS, default='cash')
+    payment_status = models.CharField(max_length=10, choices=PAYMENT_STATUS, default='unpaid')
+    platform_fee = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    public_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    payment_proof = models.ImageField(upload_to='proofs/', null=True, blank=True)
 
     class Meta:
         ordering = ['-created_at']

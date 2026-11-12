@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
     'shop',
+    'payments',
     'corsheaders',
 ]
 
@@ -140,6 +141,8 @@ REST_FRAMEWORK = {
         'login': '10/min',
         'register': '5/hour',
         'checkout': '30/hour',
+        'payments': '30/hour',
+        'track': '120/min',
     },
 }
 
@@ -161,3 +164,16 @@ if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+
+# ---------------------------------------------------------------- Pagos
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:8081')
+BACKEND_PUBLIC_URL = os.environ.get('BACKEND_PUBLIC_URL', 'http://127.0.0.1:8000').rstrip('/')
+# Comisión de la plataforma sobre cada venta (en %). 0 en la demo; configurable por entorno.
+PLATFORM_FEE_PERCENT = os.environ.get('PLATFORM_FEE_PERCENT', '0')
+# Mercado Pago (aplicación de la plataforma, modelo marketplace). Vacío = Mercado Pago deshabilitado.
+MP_CLIENT_ID = os.environ.get('MP_CLIENT_ID', '')
+MP_CLIENT_SECRET = os.environ.get('MP_CLIENT_SECRET', '')
+MP_WEBHOOK_SECRET = os.environ.get('MP_WEBHOOK_SECRET', '')
+MP_USE_SANDBOX_URL = env_bool('MP_USE_SANDBOX_URL', False)
+# Clave para cifrar los tokens de los vendedores (si falta se deriva de SECRET_KEY).
+PAYMENTS_ENCRYPTION_KEY = os.environ.get('PAYMENTS_ENCRYPTION_KEY', '')

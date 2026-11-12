@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 
 from .Api.auth import VerifyUserToken
 from .Api.category import CategoriesByShopView, CategoriesWithProductsView, CategoryList
@@ -17,7 +17,8 @@ from .Api.product import (
     ProductUpdateView,
     search_products,
 )
-from .Api.shop import ProductShopView, ShopProductsListView
+from .Api.shop import (ProductShopView, ShopDetailView, ShopListView, ShopProductsListView,
+                       ShopProfileView)
 from .Api.subcategory import SubCategoryList
 from .Api.user import (
     ChangeUserStateView,
@@ -29,6 +30,10 @@ from .Api.user import (
 
 urlpatterns = [
     # Usuarios / tiendas
+    path('', include('payments.urls')),
+    path('shops/', ShopListView.as_view(), name='shop-list'),
+    path('shops/<slug:slug>/', ShopDetailView.as_view(), name='shop-detail'),
+    path('shop/profile/', ShopProfileView.as_view(), name='shop-profile'),
     path('register/', RegisterShopView.as_view(), name='register_shop'),
     path('create_user/', CreateUserView.as_view(), name='create_user'),
     path('update_user/<int:pk>/', UpdateUserView.as_view(), name='update_user'),
